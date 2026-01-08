@@ -21,4 +21,5 @@ public class Skill {
     @JoinColumn(name = "profile_id")
     @JsonIgnore
     private Profile profile;
+
 }

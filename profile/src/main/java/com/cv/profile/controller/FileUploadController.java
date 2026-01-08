@@ -49,7 +49,7 @@ public class FileUploadController {
 
             // Trả về URL để Frontend truy cập
             // VD: http://localhost:8080/uploads/uuid_avatar.png
-            String fileUrl = "http://localhost:8080/uploads/" + randomFileName;
+            String fileUrl = "${URL_BACKEND}" + "/uploads/" + randomFileName;
 
             return ResponseEntity.ok(fileUrl);
         } catch (IOException ex) {
