@@ -50,6 +50,7 @@ public class Project {
     @Column(columnDefinition = "TEXT")
     private String sourceCodeUrl;
 
+    // proflie của người dùng
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id")
     @ToString.Exclude
