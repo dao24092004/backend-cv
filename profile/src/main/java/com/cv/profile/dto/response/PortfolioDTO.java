@@ -14,6 +14,9 @@ public class PortfolioDTO {
     private String avatarUrl;
     private ContactDTO contact;
 
+    private String regionName;
+    private String localOrgName;
+    private String departmentName;
     // Danh sách đầy đủ
     private List<ExperienceDTO> workHistory;
     private List<ProjectDTO> projects;

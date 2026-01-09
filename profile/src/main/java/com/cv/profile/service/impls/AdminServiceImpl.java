@@ -32,6 +32,8 @@ public class AdminServiceImpl implements AdminService {
     private final PublicationRepository publicationRepository;
     private final EventRepository eventRepository;
 
+    private final DepartmentRepository departmentRepository;
+
     private final PortfolioMapper mapper;
     private final CvParserServiceImpl cvParserService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -144,6 +146,13 @@ public class AdminServiceImpl implements AdminService {
 
         // Cập nhật dữ liệu
         mapper.updateProfileFromDto(req, profile);
+        if (req.getDepartmentId() != null) {
+            Department dept = departmentRepository.findById(req.getDepartmentId())
+                    .orElseThrow(() -> new RuntimeException("Department ID not found: " + req.getDepartmentId()));
+
+            // Gán quan hệ
+            profile.setDepartment(dept);
+        }
 
         // Lưu lại
         profileRepository.save(profile);

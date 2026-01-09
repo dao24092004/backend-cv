@@ -51,4 +51,8 @@ public class Profile {
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL)
     private List<Event> events = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 }

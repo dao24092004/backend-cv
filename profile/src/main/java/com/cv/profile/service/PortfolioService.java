@@ -11,4 +11,8 @@ public interface PortfolioService {
     PortfolioDTO getPortfolioById(Long id);
 
     List<PortfolioDTO> getAllProfiles();
+
+    public PortfolioDTO getPortfolioWithFullValidation(Long rid, Long lid, Long did, Long pid);
+
+    PortfolioDTO getPortfolioByHierarchyCodes(String rCode, String lCode, String dCode, Long pid);
 }

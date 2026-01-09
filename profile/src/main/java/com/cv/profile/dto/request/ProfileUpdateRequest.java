@@ -14,4 +14,5 @@ public class ProfileUpdateRequest {
     private String avatarUrl;
     private String linkedin;
     private String github;
+    private Long departmentId;
 }

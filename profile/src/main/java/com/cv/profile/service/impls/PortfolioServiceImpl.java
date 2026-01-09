@@ -75,4 +75,57 @@ public class PortfolioServiceImpl implements PortfolioService {
                                 .map(mapper::toPortfolioDTO)
                                 .collect(Collectors.toList());
         }
+
+        @Override
+        public PortfolioDTO getPortfolioWithFullValidation(Long rid, Long lid, Long did, Long pid) {
+                // 1. Tìm Portfolio (Đã được tối ưu JOIN nhờ @EntityGraph)
+                Profile entity = profileRepository.findById(pid)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên ID: " + pid));
+
+                // 2. Validate dữ liệu 4 cấp
+                if (entity.getDepartment() == null || !entity.getDepartment().getId().equals(did)) {
+                        throw new RuntimeException("Nhân viên không thuộc Phòng ban ID: " + did);
+                }
+                if (entity.getDepartment().getLocalOrg() == null
+                                || !entity.getDepartment().getLocalOrg().getId().equals(lid)) {
+                        throw new RuntimeException("Phòng ban không thuộc Chi nhánh ID: " + lid);
+                }
+                if (entity.getDepartment().getLocalOrg().getRegion() == null
+                                || !entity.getDepartment().getLocalOrg().getRegion().getId().equals(rid)) {
+                        throw new RuntimeException("Chi nhánh không thuộc Vùng ID: " + rid);
+                }
+
+                return mapper.toPortfolioDTO(entity);
+        }
+
+        @Override
+        public PortfolioDTO getPortfolioByHierarchyCodes(String rCode, String lCode, String dCode, Long pid) {
+                // 1. Tìm nhân viên bằng ID (Đây là cái duy nhất chính xác tuyệt đối)
+                // Dùng EntityGraph để load luôn các bảng cha
+                Profile entity = profileRepository.findById(pid)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ ID: " + pid));
+
+                // 2. Validate ngược từ dưới lên trên (Entity -> Dept -> Local -> Region)
+
+                // Kiểm tra Phòng ban (Department)
+                if (entity.getDepartment() == null ||
+                                !entity.getDepartment().getCode().equalsIgnoreCase(dCode)) {
+                        throw new RuntimeException("Nhân viên này không thuộc phòng ban có mã: " + dCode);
+                }
+
+                // Kiểm tra Chi nhánh (Local Org)
+                if (entity.getDepartment().getLocalOrg() == null ||
+                                !entity.getDepartment().getLocalOrg().getCode().equalsIgnoreCase(lCode)) {
+                        throw new RuntimeException("Phòng ban này không thuộc chi nhánh có mã: " + lCode);
+                }
+
+                // Kiểm tra Vùng (Region)
+                if (entity.getDepartment().getLocalOrg().getRegion() == null ||
+                                !entity.getDepartment().getLocalOrg().getRegion().getCode().equalsIgnoreCase(rCode)) {
+                        throw new RuntimeException("Chi nhánh này không thuộc vùng có mã: " + rCode);
+                }
+
+                // 3. Nếu mọi thứ khớp Code -> Trả về DTO
+                return mapper.toPortfolioDTO(entity);
+        }
 }

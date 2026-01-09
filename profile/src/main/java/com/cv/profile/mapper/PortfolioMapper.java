@@ -5,6 +5,9 @@ import org.springframework.stereotype.Component;
 import com.cv.profile.dto.request.*;
 import com.cv.profile.dto.ai.CVExtractionResult;
 import com.cv.profile.dto.response.*;
+import com.cv.profile.dto.response.OrganizationResponse.DepartmentResponse;
+import com.cv.profile.dto.response.OrganizationResponse.LocalOrgResponse;
+import com.cv.profile.dto.response.OrganizationResponse.RegionResponse;
 import com.cv.profile.model.*;
 
 import java.time.LocalDate;
@@ -37,13 +40,28 @@ public class PortfolioMapper {
         List<Publication> publications = entity.getPublications() != null ? entity.getPublications()
                 : new ArrayList<>();
         List<Event> events = entity.getEvents() != null ? entity.getEvents() : new ArrayList<>();
+        String deptName = null;
+        String localOrgName = null;
+        String regionName = null;
 
+        if (entity.getDepartment() != null) {
+            deptName = entity.getDepartment().getName();
+            if (entity.getDepartment().getLocalOrg() != null) {
+                localOrgName = entity.getDepartment().getLocalOrg().getName();
+                if (entity.getDepartment().getLocalOrg().getRegion() != null) {
+                    regionName = entity.getDepartment().getLocalOrg().getRegion().getName();
+                }
+            }
+        }
         return PortfolioDTO.builder()
                 .id(entity.getId())
                 .fullName(entity.getFullName())
                 .avatarUrl(entity.getAvatarUrl())
                 .jobTitle(getText(entity.getJobTitleVi(), entity.getJobTitleEn()))
                 .bio(getText(entity.getBioVi(), entity.getBioEn()))
+                .regionName(regionName)
+                .localOrgName(localOrgName)
+                .departmentName(deptName)
                 .contact(ContactDTO.builder()
                         .email(entity.getEmail())
                         .phone(entity.getPhone())
@@ -271,6 +289,7 @@ public class PortfolioMapper {
             profile.setBioVi(req.getBio());
         if (req.getAddress() != null)
             profile.setAddressVi(req.getAddress());
+
     }
 
     public Project toProjectEntity(ProjectRequest req) {
@@ -280,13 +299,57 @@ public class PortfolioMapper {
     }
 
     public void updateProjectEntity(ProjectRequest req, Project p) {
-        p.setNameVi(req.getName());
-        p.setRoleVi(req.getRole());
-        p.setDescriptionVi(req.getDescription());
-        p.setCustomer(req.getCustomer());
-        p.setTechStack(req.getTechStack());
-        p.setImageUrl(req.getImageUrl());
-        p.setSourceCodeUrl(req.getSourceCodeUrl());
+        // Map Title (assuming you want to set both VI/EN or just a common name)
+        // Since your entity has Vi/En fields but request only has 'title',
+        // we'll set both for now or you can choose a logic.
+        if (req.getTitle() != null) {
+            p.setNameVi(req.getTitle());
+            p.setNameEn(req.getTitle());
+        }
+
+        // Map Role
+        if (req.getRole() != null) {
+            p.setRoleVi(req.getRole());
+            p.setRoleEn(req.getRole());
+        }
+
+        // Map Description
+        if (req.getDescription() != null) {
+            p.setDescription(req.getDescription());
+            p.setDescriptionVi(req.getDescription());
+            p.setDescriptionEn(req.getDescription());
+        }
+
+        // Map Customer
+        if (req.getCustomer() != null) {
+            p.setCustomer(req.getCustomer());
+        }
+
+        // Map Tech Stack: Convert List<String> to String
+        if (req.getTechnologies() != null) {
+            p.setTechStack(String.join(", ", req.getTechnologies()));
+        }
+
+        // Map Image URL
+        if (req.getImageUrl() != null) {
+            p.setImageUrl(req.getImageUrl());
+        }
+
+        // Map Gallery (List<String>)
+        if (req.getGallery() != null) {
+            // Ensure the gallery list in entity is initialized
+            if (p.getGallery() == null) {
+                p.setGallery(new ArrayList<>());
+            }
+            p.getGallery().clear();
+            p.getGallery().addAll(req.getGallery());
+        }
+
+        // Map Repo URL
+        // ERROR FIX: Entity likely has 'sourceCodeUrl', not 'repoUrl'
+        if (req.getRepoUrl() != null) {
+            p.setSourceCodeUrl(req.getRepoUrl());
+        }
     }
 
     public Skill toSkillEntity(SkillRequest req) {
@@ -320,5 +383,39 @@ public class PortfolioMapper {
                 return null;
             }
         }
+    }
+
+    public RegionResponse toRegionResponse(Region r) {
+        if (r == null)
+            return null;
+        return RegionResponse.builder()
+                .id(r.getId())
+                .name(r.getName())
+                .code(r.getCode())
+                .build();
+    }
+
+    public LocalOrgResponse toLocalOrgResponse(LocalOrg l) {
+        if (l == null)
+            return null;
+        return LocalOrgResponse.builder()
+                .id(l.getId())
+                .name(l.getName())
+                .code(l.getCode())
+                .regionId(l.getRegion() != null ? l.getRegion().getId() : null)
+                .regionName(l.getRegion() != null ? l.getRegion().getName() : null)
+                .build();
+    }
+
+    public DepartmentResponse toDepartmentResponse(Department d) {
+        if (d == null)
+            return null;
+        return DepartmentResponse.builder()
+                .id(d.getId())
+                .name(d.getName())
+                .code(d.getCode())
+                .localOrgId(d.getLocalOrg() != null ? d.getLocalOrg().getId() : null)
+                .localOrgName(d.getLocalOrg() != null ? d.getLocalOrg().getName() : null)
+                .build();
     }
 }
