@@ -33,6 +33,8 @@ public class AdminServiceImpl implements AdminService {
     private final EventRepository eventRepository;
 
     private final DepartmentRepository departmentRepository;
+    private final LocalOrgRepository localOrgRepository;
+    private final RegionRepository regionRepository;
 
     private final PortfolioMapper mapper;
     private final CvParserServiceImpl cvParserService;
@@ -146,12 +148,27 @@ public class AdminServiceImpl implements AdminService {
 
         // Cập nhật dữ liệu
         mapper.updateProfileFromDto(req, profile);
+        
+        // Handle flexible organization assignment
         if (req.getDepartmentId() != null) {
             Department dept = departmentRepository.findById(req.getDepartmentId())
                     .orElseThrow(() -> new RuntimeException("Department ID not found: " + req.getDepartmentId()));
-
-            // Gán quan hệ
             profile.setDepartment(dept);
+            // Also set parent levels for consistency
+            profile.setLocalOrg(dept.getLocalOrg());
+            profile.setRegion(dept.getLocalOrg() != null ? dept.getLocalOrg().getRegion() : null);
+        } else if (req.getLocalOrgId() != null) {
+            LocalOrg localOrg = localOrgRepository.findById(req.getLocalOrgId())
+                    .orElseThrow(() -> new RuntimeException("LocalOrg ID not found: " + req.getLocalOrgId()));
+            profile.setLocalOrg(localOrg);
+            profile.setRegion(localOrg.getRegion());
+            profile.setDepartment(null); // Clear department if assigning to local org level
+        } else if (req.getRegionId() != null) {
+            Region region = regionRepository.findById(req.getRegionId())
+                    .orElseThrow(() -> new RuntimeException("Region ID not found: " + req.getRegionId()));
+            profile.setRegion(region);
+            profile.setLocalOrg(null); // Clear lower levels
+            profile.setDepartment(null);
         }
 
         // Lưu lại

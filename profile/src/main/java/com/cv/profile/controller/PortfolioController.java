@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import com.cv.profile.dto.response.PortfolioDTO;
 import com.cv.profile.service.PortfolioService;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -50,6 +48,32 @@ public class PortfolioController {
         try {
             // Gọi Service xử lý logic check Code
             PortfolioDTO result = portfolioService.getPortfolioByHierarchyCodes(regionCode, localCode, deptCode, pid);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    // New flexible endpoints for different hierarchy levels
+    @GetMapping("/view/{regionCode}/{pid}")
+    public ResponseEntity<?> getPortfolioByRegion(
+            @PathVariable String regionCode,
+            @PathVariable Long pid) {
+        try {
+            PortfolioDTO result = portfolioService.getPortfolioByRegion(regionCode, pid);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/view/{regionCode}/{localCode}/{pid}")
+    public ResponseEntity<?> getPortfolioByLocalOrg(
+            @PathVariable String regionCode,
+            @PathVariable String localCode,
+            @PathVariable Long pid) {
+        try {
+            PortfolioDTO result = portfolioService.getPortfolioByLocalOrg(regionCode, localCode, pid);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());

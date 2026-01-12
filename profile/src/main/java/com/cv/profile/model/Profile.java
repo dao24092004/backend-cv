@@ -55,4 +55,13 @@ public class Profile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    // Direct references to higher levels for flexible querying
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "local_org_id")
+    private LocalOrg localOrg;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
 }

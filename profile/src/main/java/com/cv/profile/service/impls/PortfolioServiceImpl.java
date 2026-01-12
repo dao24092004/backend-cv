@@ -1,32 +1,15 @@
 package com.cv.profile.service.impls;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cv.profile.dto.response.ContactDTO;
-import com.cv.profile.dto.response.EducationDTO;
-import com.cv.profile.dto.response.EventDTO;
-import com.cv.profile.dto.response.ExperienceDTO;
 import com.cv.profile.dto.response.PortfolioDTO;
-import com.cv.profile.dto.response.ProjectDTO;
-import com.cv.profile.dto.response.PublicationDTO;
-import com.cv.profile.dto.response.SkillDTO;
 import com.cv.profile.mapper.PortfolioMapper;
-import com.cv.profile.model.Education;
-import com.cv.profile.model.Event;
-import com.cv.profile.model.Experience;
 import com.cv.profile.model.Profile;
-import com.cv.profile.model.Project;
-import com.cv.profile.model.Publication;
-import com.cv.profile.model.Skill;
 import com.cv.profile.repository.ProfileRepository;
 import com.cv.profile.service.PortfolioService;
 
@@ -127,5 +110,69 @@ public class PortfolioServiceImpl implements PortfolioService {
 
                 // 3. Nếu mọi thứ khớp Code -> Trả về DTO
                 return mapper.toPortfolioDTO(entity);
+        }
+
+        @Override
+        public PortfolioDTO getPortfolioByRegion(String regionCode, Long pid) {
+                Profile entity = profileRepository.findById(pid)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ ID: " + pid));
+
+                // Validate region through direct reference or through hierarchy
+                boolean validRegion = false;
+                
+                // Check direct region reference first
+                if (entity.getRegion() != null && entity.getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                        validRegion = true;
+                }
+                // Fallback to hierarchy check
+                else if (entity.getDepartment() != null && 
+                         entity.getDepartment().getLocalOrg() != null &&
+                         entity.getDepartment().getLocalOrg().getRegion() != null &&
+                         entity.getDepartment().getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                        validRegion = true;
+                }
+
+                if (!validRegion) {
+                        throw new RuntimeException("Nhân viên này không thuộc vùng có mã: " + regionCode);
+                }
+
+                return mapper.toPortfolioDTO(entity);
+        }
+
+        @Override
+        public PortfolioDTO getPortfolioByLocalOrg(String regionCode, String localCode, Long pid) {
+                Profile entity = profileRepository.findById(pid)
+                                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ ID: " + pid));
+
+                // Validate local org through direct reference or through hierarchy
+                boolean validLocalOrg = false;
+                
+                // Check direct local org reference first
+                if (entity.getLocalOrg() != null && 
+                    entity.getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
+                    entity.getLocalOrg().getRegion() != null &&
+                    entity.getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                        validLocalOrg = true;
+                }
+                // Fallback to hierarchy check
+                else if (entity.getDepartment() != null && 
+                         entity.getDepartment().getLocalOrg() != null &&
+                         entity.getDepartment().getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
+                         entity.getDepartment().getLocalOrg().getRegion() != null &&
+                         entity.getDepartment().getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                        validLocalOrg = true;
+                }
+
+                if (!validLocalOrg) {
+                        throw new RuntimeException("Nhân viên này không thuộc chi nhánh có mã: " + localCode + " trong vùng: " + regionCode);
+                }
+
+                return mapper.toPortfolioDTO(entity);
+        }
+
+        @Override
+        public PortfolioDTO getPortfolioByDepartment(String regionCode, String localCode, String deptCode, Long pid) {
+                // This is the same as the existing getPortfolioByHierarchyCodes method
+                return getPortfolioByHierarchyCodes(regionCode, localCode, deptCode, pid);
         }
 }
