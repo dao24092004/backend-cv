@@ -14,5 +14,9 @@ public class ProfileUpdateRequest {
     private String avatarUrl;
     private String linkedin;
     private String github;
+    
+    // Organization assignment - flexible levels
     private Long departmentId;
+    private Long localOrgId;
+    private Long regionId;
 }
