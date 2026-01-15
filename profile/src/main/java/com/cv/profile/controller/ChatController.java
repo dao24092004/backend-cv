@@ -31,6 +31,7 @@ public class ChatController {
         return chatService.processMessage(chatMessage);
     }
 
+    // chat user
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public ChatMessageRequest addUser(@Payload ChatMessageRequest chatMessage) {
