@@ -58,4 +58,13 @@ public interface AdminService {
 
     Event getEventById(Long id); // Mới thêm
 
+    void updateSkill(Long id, SkillRequest req);
+
+    void updateExperience(Long id, ExperienceRequest req);
+
+    void updateEducation(Long id, EducationRequest req);
+
+    void updatePublication(Long id, PublicationRequest req);
+
+    void updateEvent(Long id, EventRequest req);
 }

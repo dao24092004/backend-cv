@@ -55,6 +55,7 @@ public class PortfolioMapper {
         }
         return PortfolioDTO.builder()
                 .id(entity.getId())
+                .title(entity.getTitle())
                 .fullName(entity.getFullName())
                 .avatarUrl(entity.getAvatarUrl())
                 .jobTitle(getText(entity.getJobTitleVi(), entity.getJobTitleEn()))
@@ -90,12 +91,17 @@ public class PortfolioMapper {
     }
 
     public ExperienceDTO toExperienceDTO(Experience e) {
+        // --- FIX: Check for null before unboxing Boolean ---
+        boolean isCurrent = e.getIsCurrent() != null && e.getIsCurrent();
+
         return ExperienceDTO.builder()
+                .id(e.getId()) // Ensure ID is mapped for updates
                 .companyName(e.getCompanyName())
                 .position(getText(e.getPositionVi(), e.getPositionEn()))
                 .description(getText(e.getDescriptionVi(), e.getDescriptionEn()))
                 .startDate(e.getStartDate() != null ? e.getStartDate().toString() : null)
-                .endDate(e.getIsCurrent() || e.getEndDate() == null ? "Present" : e.getEndDate().toString())
+                .endDate(isCurrent || e.getEndDate() == null ? "Present" : e.getEndDate().toString())
+                .isCurrent(isCurrent)
                 .build();
     }
 
@@ -114,26 +120,47 @@ public class PortfolioMapper {
     }
 
     public SkillDTO toSkillDTO(Skill s) {
-        return SkillDTO.builder().name(s.getName()).category(s.getCategory()).proficiency(s.getProficiency()).build();
+        return SkillDTO.builder()
+                .id(s.getId()) // Ensure ID is mapped
+                .name(s.getName())
+                .category(s.getCategory())
+                .proficiency(s.getProficiency())
+                .build();
     }
 
     public EducationDTO toEducationDTO(Education e) {
         String start = e.getStartDate() != null ? String.valueOf(e.getStartDate().getYear()) : "N/A";
         String end = e.getEndDate() != null ? String.valueOf(e.getEndDate().getYear()) : "Present";
-        return EducationDTO.builder().school(e.getSchoolName()).degree(getText(e.getDegreeVi(), e.getDegreeEn()))
-                .description(getText(e.getDescriptionVi(), e.getDescriptionEn())).period(start + " - " + end).build();
+        return EducationDTO.builder()
+                .id(e.getId()) // Ensure ID is mapped
+                .school(e.getSchoolName())
+                .degree(getText(e.getDegreeVi(), e.getDegreeEn()))
+                .description(getText(e.getDescriptionVi(), e.getDescriptionEn()))
+                // .startDate(e.getStartDate() != null ? e.getStartDate().toString() : null)
+                // .endDate(e.getEndDate() != null ? e.getEndDate().toString() : null)
+                .period(start + " - " + end)
+                .build();
     }
 
     public PublicationDTO toPublicationDTO(Publication p) {
-        return PublicationDTO.builder().title(getText(p.getTitleVi(), p.getTitleEn())).publisher(p.getPublisher())
-                .releaseDate(p.getReleaseDate() != null ? p.getReleaseDate().toString() : null).link(p.getUrl())
+        return PublicationDTO.builder()
+                .id(p.getId()) // Ensure ID is mapped
+                .title(getText(p.getTitleVi(), p.getTitleEn()))
+                .publisher(p.getPublisher())
+                .releaseDate(p.getReleaseDate() != null ? p.getReleaseDate().toString() : null)
+                .link(p.getUrl())
                 .build();
     }
 
     public EventDTO toEventDTO(Event e) {
-        return EventDTO.builder().name(getText(e.getNameVi(), e.getNameEn())).role(e.getRole())
+        return EventDTO.builder()
+                .id(e.getId()) // Ensure ID is mapped
+                .name(getText(e.getNameVi(), e.getNameEn()))
+                .role(e.getRole())
                 .description(getText(e.getDescriptionVi(), e.getDescriptionEn()))
-                .date(e.getDate() != null ? e.getDate().toString() : null).imageUrl(e.getImageUrl()).build();
+                .date(e.getDate() != null ? e.getDate().toString() : null)
+                .imageUrl(e.getImageUrl())
+                .build();
     }
 
     // ================= FROM AI TO ENTITY (FIXED FULLNAME) =================
@@ -289,6 +316,8 @@ public class PortfolioMapper {
             profile.setBioVi(req.getBio());
         if (req.getAddress() != null)
             profile.setAddressVi(req.getAddress());
+        if (req.getTitle() != null)
+            profile.setTitle(req.getTitle());
 
     }
 
@@ -417,5 +446,81 @@ public class PortfolioMapper {
                 .localOrgId(d.getLocalOrg() != null ? d.getLocalOrg().getId() : null)
                 .localOrgName(d.getLocalOrg() != null ? d.getLocalOrg().getName() : null)
                 .build();
+    }
+
+    public void updateSkillEntity(SkillRequest req, Skill s) {
+        if (req.getName() != null)
+            s.setName(req.getName());
+        if (req.getCategory() != null)
+            s.setCategory(req.getCategory());
+        if (req.getProficiency() != null)
+            s.setProficiency(req.getProficiency());
+    }
+
+    public void updateExperienceEntity(ExperienceRequest req, Experience e) {
+        if (req.getCompanyName() != null)
+            e.setCompanyName(req.getCompanyName());
+
+        // Lưu vào cả 2 ngôn ngữ hoặc tùy logic của bạn (ở đây lưu mặc định vào Vi/En
+        // giống nhau)
+        if (req.getPosition() != null) {
+            e.setPositionVi(req.getPosition());
+            e.setPositionEn(req.getPosition());
+        }
+        if (req.getDescription() != null) {
+            e.setDescriptionVi(req.getDescription());
+            e.setDescriptionEn(req.getDescription());
+        }
+        if (req.getStartDate() != null)
+            e.setStartDate(req.getStartDate());
+        if (req.getEndDate() != null)
+            e.setEndDate(req.getEndDate());
+        if (req.getIsCurrent() != null)
+            e.setIsCurrent(req.getIsCurrent());
+    }
+
+    public void updateEducationEntity(EducationRequest req, Education e) {
+        if (req.getSchoolName() != null)
+            e.setSchoolName(req.getSchoolName());
+        if (req.getDegree() != null) {
+            e.setDegreeVi(req.getDegree());
+            e.setDegreeEn(req.getDegree());
+        }
+        if (req.getDescription() != null) {
+            e.setDescriptionVi(req.getDescription());
+            e.setDescriptionEn(req.getDescription());
+        }
+        if (req.getStartDate() != null)
+            e.setStartDate(req.getStartDate());
+        if (req.getEndDate() != null)
+            e.setEndDate(req.getEndDate());
+    }
+
+    public void updatePublicationEntity(PublicationRequest req, Publication p) {
+        if (req.getTitle() != null) {
+            p.setTitleVi(req.getTitle());
+            p.setTitleEn(req.getTitle());
+        }
+        if (req.getPublisher() != null)
+            p.setPublisher(req.getPublisher());
+        if (req.getReleaseDate() != null)
+            p.setReleaseDate(req.getReleaseDate());
+        if (req.getUrl() != null)
+            p.setUrl(req.getUrl());
+    }
+
+    public void updateEventEntity(EventRequest req, Event e) {
+        if (req.getName() != null) {
+            e.setNameVi(req.getName());
+            e.setNameEn(req.getName());
+        }
+        if (req.getDescription() != null) {
+            e.setDescriptionVi(req.getDescription());
+            e.setDescriptionEn(req.getDescription());
+        }
+        if (req.getRole() != null)
+            e.setRole(req.getRole());
+        if (req.getDate() != null)
+            e.setDate(req.getDate());
     }
 }

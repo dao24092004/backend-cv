@@ -1,6 +1,8 @@
 package com.cv.profile.service.impls;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cv.profile.config.SecurityUtils;
 import com.cv.profile.dto.ai.CVExtractionResult;
 import com.cv.profile.dto.request.*;
 import com.cv.profile.mapper.PortfolioMapper;
@@ -22,6 +25,7 @@ import com.cv.profile.service.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdminServiceImpl implements AdminService {
 
     private final ProfileRepository profileRepository;
@@ -47,9 +51,6 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new RuntimeException("Profile not found. Please import CV or create one first."));
     }
 
-    // ========================================================================
-    // 1. IMPORT CV (AI INTEGRATION)
-    // ========================================================================
     @Override
     @Transactional
     public void importProfileFromCv(MultipartFile file) throws IOException {
@@ -148,7 +149,7 @@ public class AdminServiceImpl implements AdminService {
 
         // Cập nhật dữ liệu
         mapper.updateProfileFromDto(req, profile);
-        
+
         // Handle flexible organization assignment
         if (req.getDepartmentId() != null) {
             Department dept = departmentRepository.findById(req.getDepartmentId())
@@ -237,13 +238,12 @@ public class AdminServiceImpl implements AdminService {
                 .orElseThrow(() -> new RuntimeException("Project not found: " + id));
     }
 
-    // ========================================================================
-    // 4. SKILL CRUD
-    // ========================================================================
     @Override
     @Transactional
     public void addSkill(SkillRequest req) {
+        Long idProfile = SecurityUtils.getCurrentProfileId();
         Profile profile = getMainProfile();
+        log.info("Adding skill to profile ID: " + profile.getId());
         Skill skill = mapper.toSkillEntity(req);
         skill.setProfile(profile);
         skillRepository.save(skill);
@@ -253,6 +253,14 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void deleteSkill(Long id) {
         skillRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void updateSkill(Long id, SkillRequest req) {
+        Skill skill = getSkillById(id);
+        mapper.updateSkillEntity(req, skill); // Hàm mới thêm ở Mapper
+        skillRepository.save(skill);
     }
 
     @Override
@@ -270,6 +278,14 @@ public class AdminServiceImpl implements AdminService {
         Profile profile = getMainProfile();
         Experience exp = mapper.toExperienceEntity(req); // Map vào _vi mặc định
         exp.setProfile(profile);
+        experienceRepository.save(exp);
+    }
+
+    @Override
+    @Transactional
+    public void updateExperience(Long id, ExperienceRequest req) {
+        Experience exp = getExperienceById(id);
+        mapper.updateExperienceEntity(req, exp); // Hàm mới thêm ở Mapper
         experienceRepository.save(exp);
     }
 
@@ -307,6 +323,14 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    public void updateEducation(Long id, EducationRequest req) {
+        Education edu = getEducationById(id);
+        mapper.updateEducationEntity(req, edu); // Hàm mới thêm ở Mapper
+        educationRepository.save(edu);
+    }
+
+    @Override
+    @Transactional
     public void deleteEducation(Long id) {
         educationRepository.deleteById(id);
     }
@@ -338,6 +362,14 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    public void updatePublication(Long id, PublicationRequest req) {
+        Publication pub = getPublicationById(id);
+        mapper.updatePublicationEntity(req, pub);
+        publicationRepository.save(pub);
+    }
+
+    @Override
+    @Transactional
     public void deletePublication(Long id) {
         publicationRepository.deleteById(id);
     }
@@ -364,6 +396,14 @@ public class AdminServiceImpl implements AdminService {
         evt.setRole(req.getRole());
         evt.setDate(req.getDate());
         evt.setProfile(profile);
+        eventRepository.save(evt);
+    }
+
+    @Override
+    @Transactional
+    public void updateEvent(Long id, EventRequest req) {
+        Event evt = getEventById(id);
+        mapper.updateEventEntity(req, evt);
         eventRepository.save(evt);
     }
 

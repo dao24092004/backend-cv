@@ -13,10 +13,12 @@ public class PortfolioDTO {
     private String bio;
     private String avatarUrl;
     private ContactDTO contact;
+    private String title;
 
     private String regionName;
     private String localOrgName;
     private String departmentName;
+    private Long departmentId;
     // Danh sách đầy đủ
     private List<ExperienceDTO> workHistory;
     private List<ProjectDTO> projects;

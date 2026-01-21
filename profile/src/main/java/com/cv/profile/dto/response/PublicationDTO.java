@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class PublicationDTO {
+    private Long id;
     private String title;
     private String publisher;
     private String releaseDate;

@@ -17,4 +17,5 @@ public interface ProfileRepository extends JpaRepository<Profile, Long> {
 
     @EntityGraph(attributePaths = { "department", "department.localOrg", "department.localOrg.region" })
     Optional<Profile> findById(Long id);
+
 }

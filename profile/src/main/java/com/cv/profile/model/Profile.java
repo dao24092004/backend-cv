@@ -5,6 +5,8 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -20,6 +22,7 @@ public class Profile {
     private String avatarUrl;
     private String linkedin;
     private String github;
+    private String title;
 
     // --- SONG NGỮ ---
     private String jobTitleVi;
@@ -64,4 +67,9 @@ public class Profile {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     private Region region;
+
+    @OneToOne(mappedBy = "profile")
+    @JsonIgnore
+    @ToString.Exclude
+    private User user;
 }
