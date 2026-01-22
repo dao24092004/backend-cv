@@ -43,7 +43,10 @@ public class PortfolioMapper {
         String deptName = null;
         String localOrgName = null;
         String regionName = null;
-
+        String username = null;
+        if (entity.getUser() != null) {
+            username = entity.getUser().getUsername();
+        }
         if (entity.getDepartment() != null) {
             deptName = entity.getDepartment().getName();
             if (entity.getDepartment().getLocalOrg() != null) {
@@ -57,6 +60,7 @@ public class PortfolioMapper {
                 .id(entity.getId())
                 .titleVi(entity.getTitleVi())
                 .titleEn(entity.getTitleEn())
+                .userName(username)
                 .fullName(entity.getFullName())
                 .avatarUrl(entity.getAvatarUrl())
                 .jobTitle(getText(entity.getJobTitleVi(), entity.getJobTitleEn()))

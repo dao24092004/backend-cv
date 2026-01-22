@@ -9,6 +9,7 @@ import java.util.List;
 public class PortfolioDTO {
     private Long id;
     private String fullName;
+    private String userName;
     private String jobTitle;
     private String bio;
     private String avatarUrl;
