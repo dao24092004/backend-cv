@@ -56,6 +56,7 @@ public interface AdminService {
     // EVENT
     void addEvent(EventRequest req);
 
+    // delete event
     void deleteEvent(Long id);
 
     Event getEventById(Long id); // Mới thêm
