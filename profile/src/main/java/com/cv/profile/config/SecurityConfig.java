@@ -55,10 +55,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 1. Cho phép Frontend (React chạy ở cổng 3000) truy cập
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        // Hoặc dùng "*" nếu muốn cho phép tất cả (không khuyến khích khi có
-        // credentials)
-        // configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://pitechlab-cv-profile.vercel.app"));
 
         // 2. Cho phép các method
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
