@@ -7,7 +7,8 @@ public class ProfileUpdateRequest {
     private Long id;
     private String fullName;
     private String jobTitle;
-    private String title;
+    private String titleVi;
+    private String titleEn;
     private String email;
     private String phone;
     private String address;

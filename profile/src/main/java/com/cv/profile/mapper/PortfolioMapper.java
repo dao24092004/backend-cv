@@ -55,7 +55,8 @@ public class PortfolioMapper {
         }
         return PortfolioDTO.builder()
                 .id(entity.getId())
-                .title(entity.getTitle())
+                .titleVi(entity.getTitleVi())
+                .titleEn(entity.getTitleEn())
                 .fullName(entity.getFullName())
                 .avatarUrl(entity.getAvatarUrl())
                 .jobTitle(getText(entity.getJobTitleVi(), entity.getJobTitleEn()))
@@ -316,8 +317,10 @@ public class PortfolioMapper {
             profile.setBioVi(req.getBio());
         if (req.getAddress() != null)
             profile.setAddressVi(req.getAddress());
-        if (req.getTitle() != null)
-            profile.setTitle(req.getTitle());
+        if (req.getTitleVi() != null)
+            profile.setTitleVi(req.getTitleVi());
+        if (req.getTitleEn() != null)
+            profile.setTitleEn(req.getTitleEn());
 
     }
 

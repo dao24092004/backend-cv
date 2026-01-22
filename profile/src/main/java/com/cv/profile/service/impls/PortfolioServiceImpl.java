@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,14 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         private final ProfileRepository profileRepository;
         private final PortfolioMapper mapper;
+
+        @Override
+        public Page<PortfolioDTO> getAllProfiles(Pageable pageable) {
+                // 1. Gọi findAll(pageable) của JPA Repository -> Trả về Page<Profile>
+                return profileRepository.findAll(pageable)
+                                // 2. Map từng phần tử Profile sang PortfolioDTO
+                                .map(mapper::toPortfolioDTO);
+        }
 
         @Override
         @Transactional(readOnly = true)
@@ -119,16 +129,17 @@ public class PortfolioServiceImpl implements PortfolioService {
 
                 // Validate region through direct reference or through hierarchy
                 boolean validRegion = false;
-                
+
                 // Check direct region reference first
                 if (entity.getRegion() != null && entity.getRegion().getCode().equalsIgnoreCase(regionCode)) {
                         validRegion = true;
                 }
                 // Fallback to hierarchy check
-                else if (entity.getDepartment() != null && 
-                         entity.getDepartment().getLocalOrg() != null &&
-                         entity.getDepartment().getLocalOrg().getRegion() != null &&
-                         entity.getDepartment().getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                else if (entity.getDepartment() != null &&
+                                entity.getDepartment().getLocalOrg() != null &&
+                                entity.getDepartment().getLocalOrg().getRegion() != null &&
+                                entity.getDepartment().getLocalOrg().getRegion().getCode()
+                                                .equalsIgnoreCase(regionCode)) {
                         validRegion = true;
                 }
 
@@ -146,25 +157,27 @@ public class PortfolioServiceImpl implements PortfolioService {
 
                 // Validate local org through direct reference or through hierarchy
                 boolean validLocalOrg = false;
-                
+
                 // Check direct local org reference first
-                if (entity.getLocalOrg() != null && 
-                    entity.getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
-                    entity.getLocalOrg().getRegion() != null &&
-                    entity.getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                if (entity.getLocalOrg() != null &&
+                                entity.getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
+                                entity.getLocalOrg().getRegion() != null &&
+                                entity.getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
                         validLocalOrg = true;
                 }
                 // Fallback to hierarchy check
-                else if (entity.getDepartment() != null && 
-                         entity.getDepartment().getLocalOrg() != null &&
-                         entity.getDepartment().getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
-                         entity.getDepartment().getLocalOrg().getRegion() != null &&
-                         entity.getDepartment().getLocalOrg().getRegion().getCode().equalsIgnoreCase(regionCode)) {
+                else if (entity.getDepartment() != null &&
+                                entity.getDepartment().getLocalOrg() != null &&
+                                entity.getDepartment().getLocalOrg().getCode().equalsIgnoreCase(localCode) &&
+                                entity.getDepartment().getLocalOrg().getRegion() != null &&
+                                entity.getDepartment().getLocalOrg().getRegion().getCode()
+                                                .equalsIgnoreCase(regionCode)) {
                         validLocalOrg = true;
                 }
 
                 if (!validLocalOrg) {
-                        throw new RuntimeException("Nhân viên này không thuộc chi nhánh có mã: " + localCode + " trong vùng: " + regionCode);
+                        throw new RuntimeException("Nhân viên này không thuộc chi nhánh có mã: " + localCode
+                                        + " trong vùng: " + regionCode);
                 }
 
                 return mapper.toPortfolioDTO(entity);

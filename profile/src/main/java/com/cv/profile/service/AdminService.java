@@ -14,6 +14,8 @@ public interface AdminService {
 
     void activateProfile(Long id);
 
+    void deleteProfile(Long id);
+
     // PROJECT
     void addProject(ProjectRequest req);
 

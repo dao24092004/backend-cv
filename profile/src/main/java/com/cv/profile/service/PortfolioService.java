@@ -2,6 +2,9 @@ package com.cv.profile.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.cv.profile.dto.response.PortfolioDTO;
 
 public interface PortfolioService {
@@ -17,8 +20,10 @@ public interface PortfolioService {
 
     // New flexible methods for different hierarchy levels
     PortfolioDTO getPortfolioByRegion(String regionCode, Long pid);
-    
+
     PortfolioDTO getPortfolioByLocalOrg(String regionCode, String localCode, Long pid);
-    
+
+    Page<PortfolioDTO> getAllProfiles(Pageable pageable);
+
     PortfolioDTO getPortfolioByDepartment(String regionCode, String localCode, String deptCode, Long pid);
 }

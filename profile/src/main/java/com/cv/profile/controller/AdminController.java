@@ -3,6 +3,11 @@ package com.cv.profile.controller;
 import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +30,14 @@ public class AdminController {
 
     // --- GET LIST API (FIX 404) ---
     @GetMapping("/list")
-    public ResponseEntity<List<PortfolioDTO>> getAllProfiles() {
-        return ResponseEntity.ok(portfolioService.getAllProfiles());
+    public ResponseEntity<Page<PortfolioDTO>> getAllProfiles(
+            @RequestParam(defaultValue = "0") int page, // Trang số mấy (bắt đầu từ 0)
+            @RequestParam(defaultValue = "10") int size // Kích thước trang
+    ) {
+        // Tạo đối tượng Pageable, sắp xếp theo ID giảm dần (mới nhất lên đầu)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+
+        return ResponseEntity.ok(portfolioService.getAllProfiles(pageable));
     }
 
     // --- GET DETAILS API ---
@@ -213,5 +224,15 @@ public class AdminController {
     public ResponseEntity<String> activateProfile(@PathVariable Long id) {
         adminService.activateProfile(id);
         return ResponseEntity.ok("Đã kích hoạt hồ sơ này hiển thị ra trang chủ!");
+    }
+
+    @DeleteMapping("/profile/{id}")
+    public ResponseEntity<String> deleteProfile(@PathVariable Long id) {
+        try {
+            adminService.deleteProfile(id);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Lỗi: " + e.getMessage());
+        }
+        return ResponseEntity.ok("Đã xóa hồ sơ!");
     }
 }

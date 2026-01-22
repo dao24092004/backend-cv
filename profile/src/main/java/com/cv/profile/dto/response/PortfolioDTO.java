@@ -13,7 +13,8 @@ public class PortfolioDTO {
     private String bio;
     private String avatarUrl;
     private ContactDTO contact;
-    private String title;
+    private String titleVi;
+    private String titleEn;
 
     private String regionName;
     private String localOrgName;

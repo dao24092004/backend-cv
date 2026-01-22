@@ -22,7 +22,8 @@ public class Profile {
     private String avatarUrl;
     private String linkedin;
     private String github;
-    private String title;
+    private String titleVi;
+    private String titleEn;
 
     // --- SONG NGỮ ---
     private String jobTitleVi;

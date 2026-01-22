@@ -35,6 +35,7 @@ public class AdminServiceImpl implements AdminService {
     private final EducationRepository educationRepository;
     private final PublicationRepository publicationRepository;
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     private final DepartmentRepository departmentRepository;
     private final LocalOrgRepository localOrgRepository;
@@ -417,5 +418,18 @@ public class AdminServiceImpl implements AdminService {
     public Event getEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Event not found: " + id));
+    }
+
+    @Override
+    @Transactional
+    public void deleteProfile(Long id) {
+        Optional<User> userOptional = userRepository.findByProfileId(id); // Cần thêm hàm này vào UserRepository
+
+        if (userOptional.isPresent()) {
+
+            userRepository.delete(userOptional.get());
+        } else {
+            profileRepository.deleteById(id);
+        }
     }
 }
