@@ -1,65 +1,84 @@
+# version: '3.8'
+
+# services:
+
+#   postgres:
+#     image: postgres:15
+#     container_name: cv_postgres
+#     environment:
+#       POSTGRES_DB: cv_profile_db
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: password123 # Mật khẩu đơn giản cho môi trường dev
+#     ports:
+#       - "5433:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     networks:
+#       - cv_network
+
+#   # 2. CACHE - Redis
+#   # Cache API Profile để giảm tải cho DB khi F5 nhiều lần
+#   redis:
+#     image: redis:alpine
+#     container_name: cv_redis
+#     ports:
+#       - "6379:6379"
+#     networks:
+#       - cv_network
+
+#   # 3. MESSAGE QUEUE - Zookeeper & Kafka
+#   # Xử lý luồng Chat bất đồng bộ (Async Processing)
+#   zookeeper:
+#     image: confluentinc/cp-zookeeper:latest
+#     container_name: cv_zookeeper
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#       ZOOKEEPER_TICK_TIME: 2000
+#     networks:
+#       - cv_network
+
+#   kafka:
+#     image: confluentinc/cp-kafka:latest
+#     container_name: cv_kafka
+#     depends_on:
+#       - zookeeper
+#     ports:
+#       - "9094:9094"
+#     environment:
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+#       # Cấu hình quan trọng để Spring Boot bên ngoài container kết nối được
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+#       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+#       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#     networks:
+#       - cv_network
+
+# # Định nghĩa Volume và Network để dữ liệu không mất khi tắt Docker
+# volumes:
+#   postgres_data:
+
+# networks:
+#   cv_network:
+#     driver: bridge
+
 version: '3.8'
-
 services:
-
-  postgres:
-    image: postgres:15
-    container_name: cv_postgres
-    environment:
-      POSTGRES_DB: cv_profile_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123 # Mật khẩu đơn giản cho môi trường dev
+  # 1. MinIO: Lưu trữ file JSON (Thay IPFS)
+  minio:
+    image: minio/minio
     ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cv_network
-
-  # 2. CACHE - Redis
-  # Cache API Profile để giảm tải cho DB khi F5 nhiều lần
-  redis:
-    image: redis:alpine
-    container_name: cv_redis
-    ports:
-      - "6379:6379"
-    networks:
-      - cv_network
-
-  # 3. MESSAGE QUEUE - Zookeeper & Kafka
-  # Xử lý luồng Chat bất đồng bộ (Async Processing)
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: cv_zookeeper
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - cv_network
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "password123"
+    command: server /data --console-address ":9001"
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: cv_kafka
-    depends_on:
-      - zookeeper
+  ganache:
+    image: trufflesuite/ganache-cli:latest
     ports:
-      - "9094:9094"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # Cấu hình quan trọng để Spring Boot bên ngoài container kết nối được
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - cv_network
-
-# Định nghĩa Volume và Network để dữ liệu không mất khi tắt Docker
-volumes:
-  postgres_data:
-
-
-networks:
-  cv_network:
-    driver: bridge
+      - "8545:8545"
+    # Network ID 1337, 10 ví có sẵn tiền
+    command: --networkId 1337 --accounts 10 --defaultBalanceEther 100 --mnemonic "code vibe secret key"

@@ -1,5 +1,6 @@
 package com.cv.profile.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,6 @@ public class Project {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
     @Column(columnDefinition = "TEXT")
     private String descriptionVi;
     @Column(columnDefinition = "TEXT")
